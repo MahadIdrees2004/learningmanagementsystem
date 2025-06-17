@@ -18,35 +18,57 @@ const assignmentSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  totalMarks: {
+  totalPoints: {
     type: Number,
     required: true,
+    min: 0
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   submissions: [{
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      required: true
     },
-    submissionUrl: String,
-    submissionDate: {
+    submittedAt: {
       type: Date,
       default: Date.now,
     },
-    marks: Number,
+    content: {
+      type: String,
+      required: true
+    },
+    attachments: [{
+      name: String,
+      url: String,
+      type: String
+    }],
+    grade: {
+      type: Number,
+      min: 0
+    },
     feedback: String,
+    status: {
+      type: String,
+      enum: ['submitted', 'graded', 'late'],
+      default: 'submitted'
+    }
   }],
   attachments: [{
     name: String,
     url: String,
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+    type: String
+  }]
+}, {
+  timestamps: true
 });
+
+// Add indexes for faster queries
+assignmentSchema.index({ course: 1, dueDate: 1 });
+assignmentSchema.index({ 'submissions.student': 1 });
 
 export default mongoose.models.Assignment || mongoose.model('Assignment', assignmentSchema);
